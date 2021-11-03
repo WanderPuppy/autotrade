@@ -91,8 +91,12 @@ while True:
             print("Change no.1 crypto {1}! ({0} -> {1})".format(crypto_name, target_crypto_name))
             crypto_name = target_crypto_name
             
-            #Sell Crypto
-            sell_crypto = get_balance(crypto_name)
+            #Sell crypto_name
+            print(crypto_name)
+            crypto_name1 = crypto_name.split('-')
+            crypto_name2 = crypto_name[-1]
+            sell_crypto = get_balance(crypto_name2)
+            print(sell_crypto)
             upbit.sell_market_order(crypto_name, sell_crypto)
             print("Successful Sell-trade")
             
