@@ -20,8 +20,8 @@ def upload_tickers(tickers): # ticker의 이름과 가격 저장
     print("Successful data upload")
     return tickers_price
     
-def tickers_tangent(ticker): # ticker의 5분 구간의 차이 구함 (5분후 가격 - 5분전 가격) / 5분전 가격 
-    df = pyupbit.get_ohlcv(ticker, count = 5, interval = "minute1")
+def tickers_tangent(ticker): # ticker의 2분 구간의 차이 구함 (5분후 가격 - 5분전 가격) / 5분전 가격 
+    df = pyupbit.get_ohlcv(ticker, count = 2, interval = "minute1")
     delta = (df.iloc[-1]['close'] - df.iloc[0]['open']) / df.iloc[0]['open'] * 100
     time.sleep(0.1)
     return delta
@@ -95,6 +95,8 @@ while True:
             sell_crypto = get_balance(crypto_name)
             upbit.sell_market_order(crypto_name, sell_crypto)
             print("Successful Sell-trade")
+            
+            time.sleep(1)
             
             #Buy Crypto
             krw = get_balance("KRW")
