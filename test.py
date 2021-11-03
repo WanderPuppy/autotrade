@@ -97,7 +97,7 @@ while True:
             crypto_name2 = crypto_name[-1]
             sell_crypto = get_balance(crypto_name2)
             print(sell_crypto)
-            upbit.sell_market_order(crypto_name, sell_crypto)
+            upbit.sell_market_order(crypto_name, sell_crypto * 0.9995)
             print("Successful Sell-trade")
             
             time.sleep(1)
