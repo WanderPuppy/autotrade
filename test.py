@@ -89,29 +89,31 @@ while True:
         target_crypto_name = target_crypto[0][0]
         if crypto_name != target_crypto_name: #상승률이 가장 큰 코인 변동있을 때
             print("Change no.1 crypto {1}! ({0} -> {1})".format(crypto_name, target_crypto_name))
-            crypto_name = target_crypto_name
             
             #Sell crypto_name
             print(crypto_name)
             crypto_name1 = crypto_name.split('-')
-            crypto_name2 = crypto_name[-1]
+            crypto_name2 = crypto_name1[-1]
+            print(crypto_name2)
             sell_crypto = get_balance(crypto_name2)
             print(sell_crypto)
-            upbit.sell_market_order(crypto_name, sell_crypto * 0.9995)
-            print("Successful Sell-trade")
+            if sell_crypto > 0:
+                upbit.sell_market_order(crypto_name, sell_crypto * 0.9995)
+                print("Successful Sell-trade")
             
             time.sleep(1)
-            
+            crypto_name = target_crypto_name
+
+
             #Buy Crypto
             krw = get_balance("KRW")
             
             if krw > 5000:
                 upbit.buy_market_order(crypto_name, krw*0.9995)
                 print("Successful Buy-trade")
-            
+        
 
-        time.sleep(1)
+        time.sleep(60)
     except Exception as e:
         print(e)
         time.sleep(1)
-
