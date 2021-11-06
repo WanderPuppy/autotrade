@@ -1,5 +1,6 @@
 import pyupbit
 import time
+import datetime
 import numpy as np
 
 day = 1
@@ -34,7 +35,10 @@ def get_ticker_data(tickers):
     print("Sorting ticker data")
     for i in range(min_interv, t):
         stickers_delta = tickers_delta.iloc[i]
-        most_crypto[i] = sorted(tickers_delta.items(), key=lambda x: x[1], reverse=True)
+        print(stickers_delta)
+        most_crypto[i] = sorted(stickers_delta.items(), key=lambda x: x[1], reverse=True)
+        print(most_crypto[i])
+        
     return most_crypto
 
 print(get_ticker_data(tickers))
