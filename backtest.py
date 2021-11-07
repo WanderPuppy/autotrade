@@ -2,13 +2,15 @@ import pyupbit
 import time
 import datetime
 import numpy as np
+import pandas as pd
+import openpyxl
 
 day = 1
 t = day * 3600
 tickers = pyupbit.get_tickers(fiat="KRW")
 tickers_count = len(tickers)
-tickers_delta = {}
-df = {}
+tickers_delta = pd.DataFrame()
+df = pd.DataFrame()
 crypto = "KRW-BTC"
 money = 10000
 
@@ -29,7 +31,10 @@ def get_ticker_data(tickers):
     print("Getting ticker data")
     for i in range(0, tickers_count):
         tickers_delta[tickers[i]] = get_delta(tickers[i])
+        print(tickers_delta)
         time.sleep(0.1)
+    print(tickers_delta)
+    tickers_delta.to_excel("test.xlsx")
     stickers_delta = {}
     most_crypto = {}
     print("Sorting ticker data")
