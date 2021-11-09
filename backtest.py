@@ -11,7 +11,7 @@ tickers_delta = pd.DataFrame()
 df = pd.DataFrame()
 money = 10000
 
-min_interv = 5
+min_interv = 10
 
 
 def get_delta(ticker, now):
@@ -24,53 +24,79 @@ def get_delta(ticker, now):
     time.sleep(0.1)
     return df[ticker]
 
-def get_ticker_delta_data(tickers):
-    print("Getting ticker data")
-    now = datetime.datetime.now()
+def get_ticker_delta_data(tickers): #tickers_delta 데이터 불러오기 
+    print("Getting tickers data")
 
     
-    for i in range(0, tickers_count):
+    for i in range(0, tickers_count): # get_delta를 이용해 delta값을 계산해 저장
         ticker = tickers[i]
         tickers_delta[ticker] = get_delta(ticker, now)
         print("Data Loading ({0} / {1})".format(i, tickers_count-1))
         time.sleep(0.1)
+    tickers_delta.fillna(0, inplace = True)
     tickers_delta.to_excel("test.xlsx")
-    return tickers_delta
+    
+    print("Sorting tickers data")
+    s_tickers_delta = tickers_delta.to_dict('index') #각 row를 기준으로 index에 따라 딕셔너리 변환 ex) {t1: {'A': '~~'}}
+    print("Sorting tickers data ( 1 / 4)")
+    s1_tickers_delta = s_tickers_delta
+    for i in tickers_delta.index:
+        s1_tickers_delta[i] = sorted(s_tickers_delta[i].items(), key=lambda x : x[1], reverse=True) #정렬해서 리스트로 저장
+    print("Sorting tickers data ( 2 / 4)")
+    s2_tickers_delta = pd.DataFrame(s1_tickers_delta) # 데이터 프레임으로 재변환
+    print("Sorting tickers data ( 3 / 4)")
+    s3_tickers_delta = pd.DataFrame(s2_tickers_delta.transpose()) #행과 열을 바꾸어 재정렬
+    print("Sorting tickers data ( 4 / 4)")
 
-def get_most_crypto(i):
-    stickers_delta = tickers_delta.iloc[i]
-    # stickers_delta = tickers_delta.loc[]
-    name = tickers_delta.iloc[i].index[0]
-    
-    stickers_delta.sort_values(axis = 1)
-    most_crypto = stickers_delta.iloc[0, 0]
-    
-    
-    # stickers_delta = pd.DataFrame()
-    # most_crypto = pd.DataFrame()
-    # for i in range(0, 200):
-    #     stickers_delta = tickers_delta.sort_values(by=tickers_delta.index[i], axis = 1, ascending = False)
-    #     print(stickers_delta)
-    #     print(stickers_delta[i,0])
-    #     most_crypto.append(stickers_delta[i, 0])
-    #     print(most_crypto)
-    # for i in range(0, 200):
-    #     stickers_delta = tickers_delta.iloc[i]
-    #     print(stickers_delta)
-    #     most_crypto = most_crypto.append(sorted(stickers_delta.items(), key=lambda x: x[1], reverse=True)[:1], ignore_index = True)
-    #     print("Sorting ticker data ({0} / {1})".format(i, 200))
-    #     # print(most_crypto)
-    #     time.sleep(0.1)
-    # # print(len(most_crypto.index), len(tickers_delta.index))
-    # # print(most_crypto.index)
-    # print(most_crypto)
-    # most_crypto.set_index(keys = tickers_delta.index, inplace = False)
-    return most_crypto
+    return s3_tickers_delta
 
-tickers_data = get_ticker_delta_data(tickers)
-for i in (0, 200):
-    most_crypto = get_most_crypto(i)
-    print(most_crypto)
+def get_ror(time1, time2, ticker, now):
+    df = pyupbit.get_ohlcv(ticker, count = 200, interval = "minute1", to = now)
     
-print(tickers_data)
+    c_close =  df.loc[time2, 'close']
+    c_open = df.loc[time1, 'open']
+    
+    c_ror = c_close / c_open
+    
+    return c_ror
+    
+    
+
+now = datetime.datetime.now()
+money = 10000
+    
+tickers_data = get_ticker_delta_data(tickers) #tickers_data에 데이터 저장
+    
+print("Successful getting tickers data")
 tickers_data.to_excel("data.xlsx")
+crypto_price1 = 0
+crypto_name1 = "KRW-BTC"
+crypto_time1 = tickers_data.index[0]
+result = {}
+ror = 1
+s_ror = 1
+
+
+# 함수 제작
+for i in tickers_data.index[min_interv:]:
+    most_crypto = tickers_data.loc[i, 0] # 가장 상승률이 큰 데이터 불어옴
+    
+    crypto_name2 = most_crypto[0] #이름을 저장
+    crypto_price2 = most_crypto[1] #가격을 저장
+    
+    if i != ticker_data.index[0]:
+        if crypto_price2 > crypto_price1: #변동성이 더 큰 코인이 나타났을 때
+            if crypto_name2 != crypto_name1: #코인의 이름이 다르면
+                
+                ror = get_ror(crypto_time1, i, crypto_name1, now)
+                
+                crypto_name1 = crypto_name2
+                crypto_price1 = crypto_price2
+                crypto_time1 = i
+                
+                s_ror *= ror
+                
+    
+    result[i] = s_ror
+
+print(result)
