@@ -12,11 +12,12 @@ df = pd.DataFrame()
 money = 10000
 
 min_interv = 10
+min_interval = "minute3"
 
 
 def get_delta(ticker, now):
     # OHLCV(open, high, low, close, volume)로 당일 시가, 고가, 저가, 종가, 거래량에 대한 데이터
-    df = pyupbit.get_ohlcv(ticker, count = 200, interval = "minute1", to = now)
+    df = pyupbit.get_ohlcv(ticker, count = 200, interval = min_interval, to = now)
     
     # delta라는 칼럼 만듦
     df[ticker] = (df['close'] - df['open'].shift(min_interv)) / df['open'].shift(min_interv) * 100
@@ -51,12 +52,12 @@ def get_ticker_delta_data(tickers): #tickers_delta 데이터 불러오기
     return s3_tickers_delta
 
 def get_ror(time1, time2, ticker, now): #수익률 계산 함수
-    df = pyupbit.get_ohlcv(ticker, count = 200, interval = "minute1", to = now)
+    df = pyupbit.get_ohlcv(ticker, count = 200, interval = min_interval, to = now)
     
     c_close =  df.loc[time2, 'close']
     c_open = df.loc[time1, 'open']
     
-    c_ror = (c_close / c_open) - fee
+    c_ror = (c_close / c_open) - (fee * 2)
     
     return c_ror
     
@@ -106,5 +107,5 @@ result2 = pd.DataFrame(result1.transpose())
 print(result2)
 result2.to_excel('result.xlsx')
             
-print(result[tickers_data.index[min_interv]], ':', tickers_data.index[min_interv], '->', tickers_data.index[-1])
+print(result[tickers_data.index[-1]], ':', tickers_data.index[min_interv], '->', tickers_data.index[-1])
     
