@@ -56,7 +56,7 @@ def get_ror(time1, time2, ticker, now): #수익률 계산 함수
     c_close =  df.loc[time2, 'close']
     c_open = df.loc[time1, 'open']
     
-    c_ror = c_close / c_open * 100
+    c_ror = (c_close / c_open) - fee
     
     return c_ror
     
@@ -75,6 +75,7 @@ crypto_time1 = tickers_data.index[0]
 result = {}
 ror = 1
 s_ror = 1
+fee = 0.0005
 
 
 # 함수 제작
@@ -84,7 +85,7 @@ for i in tickers_data.index[min_interv:]:
     crypto_name2 = most_crypto[0] #이름을 저장
     crypto_price2 = most_crypto[1] #가격을 저장
     
-    if i != tickers_data.index[0]:
+    if i != tickers_data.index[min_interv]:
         if crypto_price2 > crypto_price1: #변동성이 더 큰 코인이 나타났을 때
             if crypto_name2 != crypto_name1: #코인의 이름이 다르면
                 
@@ -99,9 +100,11 @@ for i in tickers_data.index[min_interv:]:
     
     result[i] = s_ror # result 딕셔너리에 누적 수익률 저장
 
-result1 = pd.DataFrame(result)
-print(result1)
-result1.to_excel('result.xlsx')
+print(result)
+result1 = pd.DataFrame(result, index = [0])
+result2 = pd.DataFrame(result1.transpose())
+print(result2)
+result2.to_excel('result.xlsx')
             
-    
+print(result[tickers_data.index[min_interv]], ':', tickers_data.index[min_interv], '->', tickers_data.index[-1])
     
