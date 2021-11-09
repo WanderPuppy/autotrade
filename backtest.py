@@ -50,13 +50,13 @@ def get_ticker_delta_data(tickers): #tickers_delta 데이터 불러오기
 
     return s3_tickers_delta
 
-def get_ror(time1, time2, ticker, now):
+def get_ror(time1, time2, ticker, now): #수익률 계산 함수
     df = pyupbit.get_ohlcv(ticker, count = 200, interval = "minute1", to = now)
     
     c_close =  df.loc[time2, 'close']
     c_open = df.loc[time1, 'open']
     
-    c_ror = c_close / c_open
+    c_ror = c_close / c_open * 100
     
     return c_ror
     
@@ -84,19 +84,24 @@ for i in tickers_data.index[min_interv:]:
     crypto_name2 = most_crypto[0] #이름을 저장
     crypto_price2 = most_crypto[1] #가격을 저장
     
-    if i != ticker_data.index[0]:
+    if i != tickers_data.index[0]:
         if crypto_price2 > crypto_price1: #변동성이 더 큰 코인이 나타났을 때
             if crypto_name2 != crypto_name1: #코인의 이름이 다르면
                 
-                ror = get_ror(crypto_time1, i, crypto_name1, now)
+                ror = get_ror(crypto_time1, i, crypto_name1, now) # 수익률 계산
                 
-                crypto_name1 = crypto_name2
+                crypto_name1 = crypto_name2 
                 crypto_price1 = crypto_price2
                 crypto_time1 = i
                 
-                s_ror *= ror
+                s_ror *= ror #누적 수익률 계산
                 
     
-    result[i] = s_ror
+    result[i] = s_ror # result 딕셔너리에 누적 수익률 저장
 
-print(result)
+result1 = pd.DataFrame(result)
+print(result1)
+result1.to_excel('result.xlsx')
+            
+    
+    
