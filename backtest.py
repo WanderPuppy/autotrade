@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import openpyxl
+from matplotlib import pyplot as plt
 
 tickers = pyupbit.get_tickers(fiat="KRW")
 tickers_count = len(tickers)
@@ -54,7 +55,9 @@ def get_ticker_delta_data(tickers): #tickers_delta 데이터 불러오기
 def get_ror(time1, time2, ticker, now): #수익률 계산 함수
     df = pyupbit.get_ohlcv(ticker, count = 200, interval = min_interval, to = now)
     
-    c_close =  df.loc[time2, 'close']
+    print(time1, time2, ticker)
+    
+    c_close = df.loc[time2, 'close']
     c_open = df.loc[time1, 'open']
     
     c_ror = (c_close / c_open) - (fee * 2)
@@ -73,6 +76,8 @@ tickers_data.to_excel("data.xlsx")
 crypto_price1 = 0
 crypto_name1 = "KRW-BTC"
 crypto_time1 = tickers_data.index[0]
+crypto_time2 = tickers_data.index[0]
+print(crypto_time1)
 result = {}
 ror = 1
 s_ror = 1
@@ -81,31 +86,37 @@ fee = 0.0005
 
 # 함수 제작
 for i in tickers_data.index[min_interv:]:
+    
+    crypto_name2 = crypto_name1
+    crypto_price2 = crypto_price1
+    
     most_crypto = tickers_data.loc[i, 0] # 가장 상승률이 큰 데이터 불어옴
     
-    crypto_name2 = most_crypto[0] #이름을 저장
-    crypto_price2 = most_crypto[1] #가격을 저장
+    crypto_name1 = most_crypto[0] #이름을 저장
+    crypto_price1 = most_crypto[1] #가격을 저장
     
     if i != tickers_data.index[min_interv]:
-        if crypto_price2 > crypto_price1: #변동성이 더 큰 코인이 나타났을 때
-            if crypto_name2 != crypto_name1: #코인의 이름이 다르면
+        if crypto_price1 > crypto_price2: #변동성이 더 큰 코인이 나타났을 때
+            if crypto_name1 != crypto_name2: #코인의 이름이 다르면
+                                
+                ror = get_ror(crypto_time1, i, crypto_name2, now) # 수익률 계산
                 
-                ror = get_ror(crypto_time1, i, crypto_name1, now) # 수익률 계산
-                
-                crypto_name1 = crypto_name2 
-                crypto_price1 = crypto_price2
+                crypto_time2 = crypto_time1
                 crypto_time1 = i
                 
                 s_ror *= ror #누적 수익률 계산
                 
     
     result[i] = s_ror # result 딕셔너리에 누적 수익률 저장
+    
+    time.sleep(0.1)
 
-print(result)
 result1 = pd.DataFrame(result, index = [0])
 result2 = pd.DataFrame(result1.transpose())
-print(result2)
 result2.to_excel('result.xlsx')
             
 print(result[tickers_data.index[-1]], ':', tickers_data.index[min_interv], '->', tickers_data.index[-1])
-    
+
+plt.plot(result2.index[:], result2.iloc[:, 0])
+# plt.plot(result2)
+plt.show()
