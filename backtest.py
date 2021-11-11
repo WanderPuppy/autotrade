@@ -47,10 +47,6 @@ def get_ticker_delta_data(tickers): #tickers_delta 데이터 불러오기
 def get_ror(time1, time2, ticker, now): #수익률 계산 함수
     df = pyupbit.get_ohlcv(ticker, count = 1000, interval = min_interval, to = now, period = 10)
     
-    print(time1, time2, ticker)
-    
-    
-    
     c_close = df.loc[time2, 'close']
     c_open = df.loc[time1, 'open']
     
