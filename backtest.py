@@ -78,6 +78,7 @@ for min_interv, min_interval in zip(min_intervs, min_intervals):
         print("Successful getting tickers data")
         tickers_data.to_excel("data.xlsx")
         crypto_price1 = 0
+        crypto_prine2 = 0
         crypto_name1 = "KRW-BTC"
         crypto_time1 = tickers_data.index[0]
         crypto_time2 = tickers_data.index[0]
@@ -90,25 +91,32 @@ for min_interv, min_interval in zip(min_intervs, min_intervals):
 
         # 함수 제작
         for i in tickers_data.index[min_interv:]:
+            
+            try:
+                crypto_name2 = crypto_name1
+                crypto_price2 = crypto_price1
 
-            crypto_name2 = crypto_name1
-            crypto_price2 = crypto_price1
+                most_crypto = tickers_data.loc[i, 0] # 가장 상승률이 큰 데이터 불어옴
 
-            most_crypto = tickers_data.loc[i, 0] # 가장 상승률이 큰 데이터 불어옴
+                crypto_name1 = most_crypto[0] #이름을 저장
+                crypto_price1 = most_crypto[1] #가격을 저장
 
-            crypto_name1 = most_crypto[0] #이름을 저장
-            crypto_price1 = most_crypto[1] #가격을 저장
+                if crypto_price2 != 0:
+                    if crypto_price1 > crypto_price2: #변동성이 더 큰 코인이 나타났을 때
+                        if crypto_name1 != crypto_name2: #코인의 이름이 다르면
 
-            if i != tickers_data.index[min_interv]:
-                if crypto_price1 > crypto_price2: #변동성이 더 큰 코인이 나타났을 때
-                    if crypto_name1 != crypto_name2: #코인의 이름이 다르면
+                            ror = get_ror(crypto_time1, i, crypto_name2, now) # 수익률 계산
 
-                        ror = get_ror(crypto_time1, i, crypto_name2, now) # 수익률 계산
+                            crypto_time2 = crypto_time1
+                            crypto_time1 = i
 
-                        crypto_time2 = crypto_time1
-                        crypto_time1 = i
-
-                        s_ror *= ror #누적 수익률 계산
+                            s_ror *= ror #누적 수익률 계산
+                
+                time.sleep(1)
+            
+            except Exception as e:
+                print(e)
+                time.sleep(1)
 
 
             result[i] = s_ror # result 딕셔너리에 누적 수익률 저장
