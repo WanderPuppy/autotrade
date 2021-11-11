@@ -7,9 +7,10 @@ import openpyxl
 from matplotlib import pyplot as plt
 
 
+
 def get_delta(ticker, now):
     # OHLCV(open, high, low, close, volume)로 당일 시가, 고가, 저가, 종가, 거래량에 대한 데이터
-    df = pyupbit.get_ohlcv(ticker, count = 200, interval = min_interval, to = now, period = 0.5)
+    df = pyupbit.get_ohlcv(ticker, count = 1000, interval = min_interval, to = now, period = 10)
     
     # delta라는 칼럼 만듦
     df[ticker] = (df['close'] - df['open'].shift(min_interv)) / df['open'].shift(min_interv) * 100
@@ -44,84 +45,94 @@ def get_ticker_delta_data(tickers): #tickers_delta 데이터 불러오기
     return s3_tickers_delta
 
 def get_ror(time1, time2, ticker, now): #수익률 계산 함수
-    df = pyupbit.get_ohlcv(ticker, count = 200, interval = min_interval, to = now, period = 0.5)
+    df = pyupbit.get_ohlcv(ticker, count = 1000, interval = min_interval, to = now, period = 10)
     
     print(time1, time2, ticker)
     
-    index_data = df.index
-    t1 = index_data.find(time1)
-    t2 = t1 + min_interv
     
-    c_close = df.iloc[t2, 3]
-    c_open = df.iloc[t1, 0]
+    
+    c_close = df.loc[time2, 'close']
+    c_open = df.loc[time1, 'open']
     
     c_ror = (c_close / c_open) - (fee * 2)
     
     return c_ror
 
 
-tickers = pyupbit.get_tickers(fiat="KRW") 
-tickers_count = len(tickers)
+
 tickers_delta = pd.DataFrame()
 df = pd.DataFrame()
-money = 10000
-
-min_interv = 30
-min_interval = "minute1"
-
-
-
 now = datetime.datetime.now()
-money = 10000
-    
-tickers_data = get_ticker_delta_data(tickers) #tickers_data에 데이터 저장
-    
-print("Successful getting tickers data")
-tickers_data.to_excel("data.xlsx")
-crypto_price1 = 0
-crypto_name1 = "KRW-BTC"
-crypto_time1 = tickers_data.index[0]
-crypto_time2 = tickers_data.index[0]
-print(crypto_time1)
-result = {}
-ror = 1
-s_ror = 1
-fee = 0.0005
+result_f = {}
+
+min_intervs = [1, 5, 10, 30, 50, 100]
+min_intervals = [ "day", "minute1", "minute3", "minute5", "minute10", "minute15", "minute30", "minute60", "minute240", "week", "month"]
+
+for min_interv, min_interval in zip(min_intervs, min_intervals):
+
+    try: 
+        
+        print(min_interv, min_interval)
+        
+        tickers = pyupbit.get_tickers(fiat="KRW") 
+        tickers_count = len(tickers)
+        
+        tickers_data = get_ticker_delta_data(tickers) #tickers_data에 데이터 저장
+
+        print("Successful getting tickers data")
+        tickers_data.to_excel("data.xlsx")
+        crypto_price1 = 0
+        crypto_name1 = "KRW-BTC"
+        crypto_time1 = tickers_data.index[0]
+        crypto_time2 = tickers_data.index[0]
+        print(crypto_time1)
+        result = {}
+        ror = 1
+        s_ror = 1
+        fee = 0.0005
 
 
-# 함수 제작
-for i in tickers_data.index[min_interv:]:
-    
-    crypto_name2 = crypto_name1
-    crypto_price2 = crypto_price1
-    
-    most_crypto = tickers_data.loc[i, 0] # 가장 상승률이 큰 데이터 불어옴
-    
-    crypto_name1 = most_crypto[0] #이름을 저장
-    crypto_price1 = most_crypto[1] #가격을 저장
-    
-    if i != tickers_data.index[min_interv]:
-        if crypto_price1 > crypto_price2: #변동성이 더 큰 코인이 나타났을 때
-            if crypto_name1 != crypto_name2: #코인의 이름이 다르면
-                                
-                ror = get_ror(crypto_time1, i, crypto_name2, now) # 수익률 계산
-                
-                crypto_time2 = crypto_time1
-                crypto_time1 = i
-                
-                s_ror *= ror #누적 수익률 계산
-                
-    
-    result[i] = s_ror # result 딕셔너리에 누적 수익률 저장
-    
-    time.sleep(0.1)
+        # 함수 제작
+        for i in tickers_data.index[min_interv:]:
 
-result1 = pd.DataFrame(result, index = [0])
-result2 = pd.DataFrame(result1.transpose())
-result2.to_excel('result.xlsx')
-            
-print(result[tickers_data.index[-1]], ':', tickers_data.index[min_interv], '->', tickers_data.index[-1])
+            crypto_name2 = crypto_name1
+            crypto_price2 = crypto_price1
 
-plt.plot(result2.index[:], result2.iloc[:, 0])
-# plt.plot(result2)
-plt.show()
+            most_crypto = tickers_data.loc[i, 0] # 가장 상승률이 큰 데이터 불어옴
+
+            crypto_name1 = most_crypto[0] #이름을 저장
+            crypto_price1 = most_crypto[1] #가격을 저장
+
+            if i != tickers_data.index[min_interv]:
+                if crypto_price1 > crypto_price2: #변동성이 더 큰 코인이 나타났을 때
+                    if crypto_name1 != crypto_name2: #코인의 이름이 다르면
+
+                        ror = get_ror(crypto_time1, i, crypto_name2, now) # 수익률 계산
+
+                        crypto_time2 = crypto_time1
+                        crypto_time1 = i
+
+                        s_ror *= ror #누적 수익률 계산
+
+
+            result[i] = s_ror # result 딕셔너리에 누적 수익률 저장
+
+            time.sleep(0.1)
+
+        # result1 = pd.DataFrame(result, index = [0])
+        # result2 = pd.DataFrame(result1.transpose())
+        # result2.to_excel('result.xlsx')
+        
+        print(result[tickers_data.index[-1]], ':', tickers_data.index[min_interv], '->', tickers_data.index[-1])
+        print(min_interv, '+', min_interval, ':', result[tickers_data.index[-1]])
+        
+        min_data = str(min_interv) + min_interval
+        result_f[min_data] = result[tickers_data.index[-1]]
+        time.sleep(1)
+        
+    except Exception as e:
+        print(e)
+        time.sleep(1)
+        
+print(result_f)
+a = input("Backtest Successful Complete!")
