@@ -6,19 +6,10 @@ import pandas as pd
 import openpyxl
 from matplotlib import pyplot as plt
 
-tickers = pyupbit.get_tickers(fiat="KRW")
-tickers_count = len(tickers)
-tickers_delta = pd.DataFrame()
-df = pd.DataFrame()
-money = 10000
-
-min_interv = 10
-min_interval = "minute3"
-
 
 def get_delta(ticker, now):
     # OHLCV(open, high, low, close, volume)로 당일 시가, 고가, 저가, 종가, 거래량에 대한 데이터
-    df = pyupbit.get_ohlcv(ticker, count = 200, interval = min_interval, to = now)
+    df = pyupbit.get_ohlcv(ticker, count = 200, interval = min_interval, to = now, period = 0.5)
     
     # delta라는 칼럼 만듦
     df[ticker] = (df['close'] - df['open'].shift(min_interv)) / df['open'].shift(min_interv) * 100
@@ -33,7 +24,7 @@ def get_ticker_delta_data(tickers): #tickers_delta 데이터 불러오기
     for i in range(0, tickers_count): # get_delta를 이용해 delta값을 계산해 저장
         ticker = tickers[i]
         tickers_delta[ticker] = get_delta(ticker, now)
-        print("Data Loading ({0} / {1})".format(i, tickers_count-1))
+        print("Data Loading ({0} / {1})".format(i + 1, tickers_count))
         time.sleep(0.1)
     tickers_delta.fillna(0, inplace = True)
     tickers_delta.to_excel("test.xlsx")
@@ -53,18 +44,32 @@ def get_ticker_delta_data(tickers): #tickers_delta 데이터 불러오기
     return s3_tickers_delta
 
 def get_ror(time1, time2, ticker, now): #수익률 계산 함수
-    df = pyupbit.get_ohlcv(ticker, count = 200, interval = min_interval, to = now)
+    df = pyupbit.get_ohlcv(ticker, count = 200, interval = min_interval, to = now, period = 0.5)
     
     print(time1, time2, ticker)
     
-    c_close = df.loc[time2, 'close']
-    c_open = df.loc[time1, 'open']
+    index_data = df.index
+    t1 = index_data.find(time1)
+    t2 = t1 + min_interv
+    
+    c_close = df.iloc[t2, 3]
+    c_open = df.iloc[t1, 0]
     
     c_ror = (c_close / c_open) - (fee * 2)
     
     return c_ror
-    
-    
+
+
+tickers = pyupbit.get_tickers(fiat="KRW") 
+tickers_count = len(tickers)
+tickers_delta = pd.DataFrame()
+df = pd.DataFrame()
+money = 10000
+
+min_interv = 30
+min_interval = "minute1"
+
+
 
 now = datetime.datetime.now()
 money = 10000
