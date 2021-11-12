@@ -64,8 +64,8 @@ result_f = {}
 min_intervs = [1, 5, 10, 30, 50, 100]
 min_intervals = [ "day", "minute1", "minute3", "minute5", "minute10", "minute15", "minute30", "minute60", "minute240", "week", "month"]
 
-min_interv = 6
-min_interval = "minute5"
+min_interv = 10
+min_interval = "minute1"
 
 try: 
         
@@ -91,7 +91,7 @@ try:
 
 
     # 함수 제작
-    for i in tickers_data.index[min_interv:]:
+    for i in tickers_data.index[min_interv:]: #tickers_data.index[min_interv:]는 시간
             
         try:
             crypto_name2 = crypto_name1
@@ -103,7 +103,7 @@ try:
             crypto_price1 = most_crypto[1] #가격을 저장
 
             if crypto_price2 != 0:
-                if crypto_price1 > crypto_price2: #변동성이 더 큰 코인이 나타났을 때
+                # if crypto_price1 > crypto_price2: #변동성이 더 큰 코인이 나타났을 때
                     if crypto_name1 != crypto_name2: #코인의 이름이 다르면
                         
                         crypto_time2 = crypto_time1
