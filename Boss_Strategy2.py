@@ -21,7 +21,7 @@ def upload_tickers(tickers): # ticker의 이름과 가격 저장
     return tickers_price
     
 def tickers_tangent(ticker): # ticker의 구간의 차이 구함
-    df = pyupbit.get_ohlcv(ticker, count = 10, interval = "minute3", to = now, period = 0.2)
+    df = pyupbit.get_ohlcv(ticker, count = 6, interval = "minute5", to = now, period = 0.2)
     delta = (df.iloc[-1]['close'] - df.iloc[0]['open']) / df.iloc[0]['open'] * 100
     return delta
 
