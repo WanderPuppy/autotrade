@@ -50,37 +50,12 @@ def get_target_crypto(tickers): #상승률이 가장 큰 코인 조회
     most_crypto = sdata[:1] #상승률이 가장 높은 코인 저장
     print("{0} : {1}".format(most_crypto[0][0], most_crypto[0][1]))
     return most_crypto
-    
-# for i in range(0, tickers_count - 1):
-#     ticker = tickers[i]
-#     delta = tickers_tangent(ticker)
-#     # print(ticker, ':' , delta)
-#     time.sleep(0.05)
-
-# print(pyupbit.get_tickers(fiat="KRW"))
-# print(pyupbit.get_current_price("KRW-BTC"))
-
-
-# for i in range(0, tickers_count-1):
-#     print(tickers[i], pyupbit.get_current_price(tickers[i]))
-#     time.sleep(0.1)
 
 #로그인
 access = "YqSsA9cIqwPfMbVO0BcRxqeD0dVxDYxbACJVZxIG"
 secret = "jUl1rn9L9xG8ro2uxxea41wDiDSlv3B3nz5iPeIB"
 upbit = pyupbit.Upbit(access, secret)
 print("autotrade start")
-
-# target_crypto = get_target_crypto(tickers)
-# print(target_crypto)
-# print(target_crypto[0][0])
-# crypto_name = ""
-# print(crypto_name)
-# target_crypto_name = target_crypto[0][0]
-# if crypto_name != target_crypto_name: #다시 불러와도 상승률이 가장 큰 코인 변동있을 때
-#     crypto_name = target_crypto_name
-# print(crypto_name)
-
 
 while True:
     try:
@@ -98,7 +73,7 @@ while True:
             sell_crypto = get_balance(crypto_name2)
             print(sell_crypto)
             if sell_crypto > 0:
-                upbit.sell_market_order(crypto_name, sell_crypto * 0.9995)
+                upbit.sell_market_order(crypto_name, sell_crypto)
                 print("Successful Sell-trade")
             
             time.sleep(1)
